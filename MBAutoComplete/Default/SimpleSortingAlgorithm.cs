@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 namespace MBAutoComplete
 {
-	public class SimpleSortingAlgorithm : ISortingAlghorithm
+	public class SringSortingAlgorithm : ISortingAlghorithm
 	{
 		private int _maxChanges = 3;
 
-		public SimpleSortingAlgorithm() { }
+		public SringSortingAlgorithm() { }
 
-		public ICollection<string> DoSort(string userInput, ICollection<string> inputStrings)
+		public ICollection<object> DoSort(string userInput, ICollection<object> inputStrings)
 		{
 			var correctedStrings = new List<string>();
-			foreach (string input in inputStrings)
+			foreach (string input in inputStrings as ICollection<string>)
 			{
 				if (levenshteinAlghoritm(userInput, input) <= _maxChanges)
 					correctedStrings.Add(input);
 			}
-			return correctedStrings;
+			return correctedStrings as ICollection<object>;
 		}
 
 		//levenshtein alghorithm from http://michalis.site/2013/12/levenshtein/

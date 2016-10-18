@@ -1,213 +1,223 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Cirrious.FluentLayouts.Touch;
 using CoreGraphics;
 using Foundation;
 using UIKit;
+using Cirrious.FluentLayouts.Touch;
 
 namespace MBAutoComplete
 {
-	[Register("MBAutoCompleteTextField")]
-	public class MBAutoCompleteTextField : UITextField, IUITextFieldDelegate
-	{
-		public ISortingAlghorithm SortingAlghorithm
-		{
-			get;
-			set;
-		} = new NoSortingAlghorithm();
+    [Register("MBAutoCompleteTextField")]
+    public class MBAutoCompleteTextField : UITextField, IUITextFieldDelegate
+    {
+        public ISortingAlghorithm SortingAlghorithm
+        {
+            get;
+            set;
+        } = new NoSortingAlghorithm();
 
-		private MBAutoCompleteViewSource _autoCompleteViewSource;
-		public MBAutoCompleteViewSource AutoCompleteViewSource
-		{
-			get { return _autoCompleteViewSource; }
-			set {
-				_autoCompleteViewSource = value; 
-				_autoCompleteViewSource.AutoCompleteTextField = this;
-				if(AutoCompleteTableView != null)
-					AutoCompleteTableView.Source = this.AutoCompleteViewSource;
-			}
-		}
+        private MBAutoCompleteViewSource _autoCompleteViewSource;
+        public MBAutoCompleteViewSource AutoCompleteViewSource
+        {
+            get { return _autoCompleteViewSource; }
+            set
+            {
+                _autoCompleteViewSource = value;
+                _autoCompleteViewSource.AutoCompleteTextField = this;
+                if (AutoCompleteTableView != null)
+                    AutoCompleteTableView.Source = this.AutoCompleteViewSource;
+            }
+        }
 
-		public UITableView AutoCompleteTableView
-		{
-			get;
-			private set;
-		}
+        public UITableView AutoCompleteTableView
+        {
+            get;
+            private set;
+        }
 
-		public IDataFetcher DataFetcher
-		{
-			get;
-			set;
-		}
+        public IDataFetcher DataFetcher
+        {
+            get;
+            set;
+        }
 
-		public int StartAutoCompleteAfterTicks
-		{
-			get;
-			set;
-		} = 2;
+        public int StartAutoCompleteAfterTicks
+        {
+            get;
+            set;
+        } = 2;
 
-		public int AutocompleteTableViewHeight
-		{
-			get;
-			set;
-		} = 150;
+        public int AutocompleteTableViewHeight
+        {
+            get;
+            set;
+        } = 150;
 
-		//store parent as uiviewcontroller or as uitableviewcontroller
-		private UIViewController _parentViewController;
-		private UITableViewController _parentTableViewController;
+        //store parent as uiviewcontroller or as uitableviewcontroller
+        private UIViewController _parentViewController;
+        private UITableViewController _parentTableViewController;
 
-		//UITableViewcontroller settings
-		private bool _parentIsUITableViewController = false;
-		private bool _parentTableViewBounces = false;
-		private bool _parentTableViewAllowsSelection = false;
+        //UITableViewcontroller settings
+        private bool _parentIsUITableViewController = false;
+        private bool _parentTableViewBounces = false;
+        private bool _parentTableViewAllowsSelection = false;
 
-		public MBAutoCompleteTextField(IntPtr ptr) : base(ptr){}
+        public MBAutoCompleteTextField(IntPtr ptr) : base(ptr) { }
 
-		public void Setup(UIViewController view, IList<string> suggestions)
-		{
-			_parentViewController = view;
-			DataFetcher  = new DefaultDataFetcher(suggestions);
-			AutoCompleteViewSource = new DefaultDataSource();
-			initialize();
-		}
+        public void Setup(UIViewController view, IList<object> suggestions)
+        {
+            _parentViewController = view;
+            DataFetcher = new DefaultDataFetcher(suggestions);
+            AutoCompleteViewSource = new DefaultDataSource();
+            initialize();
+        }
 
-		public void Setup(UIViewController view, IDataFetcher fetcher)
-		{
-			_parentViewController = view;
-			DataFetcher = fetcher;
-			AutoCompleteViewSource = new DefaultDataSource();
-			initialize();
-		}
+        public void Setup(UIViewController view, IDataFetcher fetcher)
+        {
+            _parentViewController = view;
+            DataFetcher = fetcher;
+            AutoCompleteViewSource = new DefaultDataSource();
+            initialize();
+        }
 
-		public void Setup(UIViewController view, IList<string> suggestions, UITableViewController tableViewController)
-		{
-			_parentTableViewController = tableViewController;
-			Setup(view, suggestions);
-		}
+        public void Setup(UIViewController view, IDataFetcher fetcher, MBAutoCompleteViewSource source)
+        {
+            _parentViewController = view;
+            DataFetcher = fetcher;
+            AutoCompleteViewSource = source;
+            initialize();
+        }
 
-		public void Setup(UIViewController view, IDataFetcher fetcher, UITableViewController tableViewController)
-		{
-			_parentTableViewController = tableViewController;
-			Setup(view, fetcher);
-		}
+        public void Setup(UIViewController view, IList<object> suggestions, UITableViewController tableViewController)
+        {
+            _parentTableViewController = tableViewController;
+            Setup(view, suggestions);
+        }
 
-		private void initialize()
-		{
-			//Make new tableview and do some settings
-			AutoCompleteTableView = new UITableView();
-			AutoCompleteTableView.Layer.CornerRadius = 5; //rounded corners
-			AutoCompleteTableView.ContentInset = UIEdgeInsets.Zero;
-			AutoCompleteTableView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight; //for resizing (switching from table to portait for example)
-			AutoCompleteTableView.Bounces = false;
-			AutoCompleteTableView.BackgroundColor = UIColor.Clear;
-			AutoCompleteTableView.TranslatesAutoresizingMaskIntoConstraints = false;
-			AutoCompleteTableView.Source = this.AutoCompleteViewSource;
-			AutoCompleteTableView.TableFooterView = new UIView();
-			AutoCompleteTableView.Hidden = true;
+        public void Setup(UIViewController view, IDataFetcher fetcher, UITableViewController tableViewController)
+        {
+            _parentTableViewController = tableViewController;
+            Setup(view, fetcher);
+        }
 
-			//Some textfield settings
-			this.TranslatesAutoresizingMaskIntoConstraints = false;
-			this.Delegate = this;
-			this.AutocorrectionType = UITextAutocorrectionType.No;
-			this.ClearButtonMode = UITextFieldViewMode.WhileEditing;
+        private void initialize()
+        {
+            //Make new tableview and do some settings
+            AutoCompleteTableView = new UITableView();
+            AutoCompleteTableView.Layer.CornerRadius = 0; //rounded corners
+            AutoCompleteTableView.ContentInset = UIEdgeInsets.Zero;
+            AutoCompleteTableView.AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight; //for resizing (switching from table to portait for example)
+            AutoCompleteTableView.Bounces = false;
+            AutoCompleteTableView.BackgroundColor = UIColor.Clear;
+            AutoCompleteTableView.TranslatesAutoresizingMaskIntoConstraints = false;
+            AutoCompleteTableView.Source = this.AutoCompleteViewSource;
+            AutoCompleteTableView.TableFooterView = new UIView();
+            AutoCompleteTableView.Hidden = true;
 
-			var isTableViewController = _parentTableViewController ?? (_parentViewController as UITableViewController);
 
-			//if parent is tableviewcontroller
-			if (isTableViewController != null)
-			{
-				_parentIsUITableViewController = true;
-				if (_parentTableViewController == null)
-					_parentTableViewController = isTableViewController;
-				_parentTableViewBounces = _parentTableViewController.TableView.Bounces;
-				_parentTableViewAllowsSelection = _parentTableViewController.TableView.AllowsSelection;
+            //Some textfield settings
+            this.TranslatesAutoresizingMaskIntoConstraints = false;
+            this.Delegate = this;
+            this.AutocorrectionType = UITextAutocorrectionType.No;
+            this.ClearButtonMode = UITextFieldViewMode.WhileEditing;
 
-				//Add the view to the contentview of the cell
-				Superview.AddSubview(AutoCompleteTableView);
+            var isTableViewController = _parentTableViewController ?? (_parentViewController as UITableViewController);
 
-				UITableViewCell cell = Superview.Superview as UIKit.UITableViewCell;
+            //if parent is tableviewcontroller
+            if (isTableViewController != null)
+            {
+                _parentIsUITableViewController = true;
+                if (_parentTableViewController == null)
+                    _parentTableViewController = isTableViewController;
+                _parentTableViewBounces = _parentTableViewController.TableView.Bounces;
+                _parentTableViewAllowsSelection = _parentTableViewController.TableView.AllowsSelection;
 
-				//Get indexpath to set the constraint to the right cell
-				NSIndexPath indexPath = _parentTableViewController.TableView.IndexPathForCell(cell);
+                //Add the view to the contentview of the cell
+                Superview.AddSubview(AutoCompleteTableView);
 
-				if (indexPath == null)
-				{
-					Console.WriteLine("Should be initialized in the ViewDidAppear and not in the ViewDidLoad!");
-					return;
-				}
-				//add constraints
-				Superview.AddConstraints(
-					AutoCompleteTableView.WithSameCenterY(this).Plus((AutocompleteTableViewHeight / 2) + 10 + cell.Frame.Height * indexPath.Row),
-					AutoCompleteTableView.WithSameWidth(this),
-					AutoCompleteTableView.WithSameLeft(this),
-					AutoCompleteTableView.Height().EqualTo(AutocompleteTableViewHeight)
-				);
-			}
-			else
-			{
-				Superview.InsertSubviewBelow(AutoCompleteTableView, _parentViewController.View);
+                UITableViewCell cell = Superview.Superview as UIKit.UITableViewCell;
 
-				//add constraints
-				Superview.AddConstraints(
-					AutoCompleteTableView.AtTopOf(this, this.Frame.Height - 5),
-					AutoCompleteTableView.WithSameWidth(this),
-					AutoCompleteTableView.WithSameLeft(this),
-					AutoCompleteTableView.Height().EqualTo(AutocompleteTableViewHeight)
-				);
-			}
+                //Get indexpath to set the constraint to the right cell
+                NSIndexPath indexPath = _parentTableViewController.TableView.IndexPathForCell(cell);
 
-			//listen to edit events
-			this.EditingChanged += async (sender, eventargs) =>
-			{
-				if (this.Text.Length > StartAutoCompleteAfterTicks)
-				{
-					showAutoCompleteView();
-					await UpdateTableViewData();
-				}
-			};
+                if (indexPath == null)
+                {
+                    Console.WriteLine("Should be initialized in the ViewDidAppear and not in the ViewDidLoad!");
+                    return;
+                }
+                //add constraints
+                Superview.AddConstraints(
+                    AutoCompleteTableView.WithSameCenterY(this).Plus((AutocompleteTableViewHeight / 2) + cell.Frame.Y + (cell.Frame.Height / 2)),
+                    AutoCompleteTableView.WithSameLeft(Superview).Plus(16),
+                    AutoCompleteTableView.WithSameWidth(Superview),
+                    AutoCompleteTableView.Height().EqualTo(AutocompleteTableViewHeight)
+                );
+            }
+            else
+            {
+                Superview.InsertSubviewBelow(AutoCompleteTableView, _parentViewController.View);
 
-			this.EditingDidEnd += (sender, eventargs) =>
-			{
-				hideAutoCompleteView();
-			};
-		}
+                //add constraints
+                Superview.AddConstraints(
+                    AutoCompleteTableView.AtTopOf(this, this.Frame.Height - 5),
+                    AutoCompleteTableView.WithSameWidth(this),
+                    AutoCompleteTableView.WithSameLeft(this),
+                    AutoCompleteTableView.Height().EqualTo(AutocompleteTableViewHeight)
+                );
+            }
 
-		private void showAutoCompleteView()
-		{
-			AutoCompleteTableView.SetContentOffset(CGPoint.Empty, false);
-			AutoCompleteTableView.Hidden = false;
+            //listen to edit events
+            this.EditingChanged += async (sender, eventargs) =>
+            {
+                if (this.Text.Length > StartAutoCompleteAfterTicks)
+                {
+                    showAutoCompleteView();
+                    await UpdateTableViewData();
+                }
+            };
 
-			if (_parentIsUITableViewController) //if is in uitableviewcontroller
-			{
-				_parentTableViewController.TableView.Bounces = false;
-				_parentTableViewController.TableView.AllowsSelection = false;
+            this.EditingDidEnd += (sender, eventargs) =>
+            {
+                hideAutoCompleteView();
+            };
+        }
 
-				_parentTableViewController.View.Add(AutoCompleteTableView);
-			}
-		}
+        private void showAutoCompleteView()
+        {
+            AutoCompleteTableView.SetContentOffset(CGPoint.Empty, false);
+            AutoCompleteTableView.Hidden = false;
 
-		private void hideAutoCompleteView()
-		{
-			AutoCompleteTableView.Hidden = true;
+            if (_parentIsUITableViewController) //if is in uitableviewcontroller
+            {
+                _parentTableViewController.TableView.Bounces = false;
+                _parentTableViewController.TableView.AllowsSelection = false;
 
-			if (_parentIsUITableViewController) //if is in uitableviewcontroller
-			{
-				_parentTableViewController.TableView.Bounces = _parentTableViewBounces;
-				_parentTableViewController.TableView.AllowsSelection = _parentTableViewAllowsSelection;
-			}
-		}
+                _parentTableViewController.View.Add(AutoCompleteTableView);
+            }
+        }
 
-		public async Task UpdateTableViewData()
-		{
-			await DataFetcher.PerformFetch(this, delegate (ICollection<string> unsortedData)
-			{
-				var sorted = this.SortingAlghorithm.DoSort(this.Text, unsortedData);
-				this.AutoCompleteViewSource.Suggestions = sorted;
+        private void hideAutoCompleteView()
+        {
+            AutoCompleteTableView.Hidden = true;
 
-				AutoCompleteTableView.ReloadData();
-			}
-			);
-		}
-	}
+            if (_parentIsUITableViewController) //if is in uitableviewcontroller
+            {
+                _parentTableViewController.TableView.Bounces = _parentTableViewBounces;
+                _parentTableViewController.TableView.AllowsSelection = _parentTableViewAllowsSelection;
+            }
+        }
+
+        public async Task UpdateTableViewData()
+        {
+            await DataFetcher.PerformFetch(this, delegate (ICollection<object> unsortedData)
+            {
+                var sorted = this.SortingAlghorithm.DoSort(this.Text, unsortedData);
+                this.AutoCompleteViewSource.Suggestions = sorted;
+
+                AutoCompleteTableView.ReloadData();
+            }
+            );
+        }
+    }
 }

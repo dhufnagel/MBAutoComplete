@@ -6,7 +6,7 @@ namespace MBAutoComplete
 	{
 		public NoSortingAlghorithm(){}
 
-		public ICollection<string> DoSort(string userInput, ICollection<string> inputStrings)
+		public ICollection<object> DoSort(string userInput, ICollection<object> inputStrings)
 		{
 			return inputStrings;
 		}

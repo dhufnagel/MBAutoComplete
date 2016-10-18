@@ -7,46 +7,60 @@ using UIKit;
 
 namespace MBAutoComplete
 {
-	public abstract class MBAutoCompleteViewSource : UITableViewSource
-	{
-		public event EventHandler RowSelectedEvent;
+    public abstract class MBAutoCompleteViewSource : UITableViewSource
+    {
+        public class AutoCompleteEventArgs : EventArgs
+        {
+            public object SelectedObject { get; private set; }
 
-		private ICollection<string> _suggestions = new List<string>();
-		public ICollection<string> Suggestions
-		{
-			get
-			{
-				return _suggestions;
-			}
-			set
-			{
-				_suggestions = value;
-				NewSuggestions(_suggestions);
-			}
-		}
+            public AutoCompleteEventArgs(object selectedObject)
+            {
+                SelectedObject = selectedObject;
+            }
+        }
 
-		public abstract void NewSuggestions(ICollection<string> suggestions);
+        public event EventHandler<AutoCompleteEventArgs> RowSelectedEvent;
 
-		public MBAutoCompleteTextField AutoCompleteTextField
-		{
-			get;
-			set;
-		}
+        private ICollection<object> _suggestions = new List<object>();
+        public ICollection<object> Suggestions
+        {
+            get
+            {
+                return _suggestions;
+            }
+            set
+            {
+                _suggestions = value;
+                NewSuggestions(_suggestions);
+            }
+        }
 
-		public abstract override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath);
+        public abstract void NewSuggestions(ICollection<object> suggestions);
 
-		public override nint RowsInSection(UITableView tableview, nint section)
-		{
-			return Suggestions.Count;
-		}
+        public MBAutoCompleteTextField AutoCompleteTextField
+        {
+            get;
+            set;
+        }
 
-		public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
-		{
-			AutoCompleteTextField.Text = Suggestions.ElementAt(indexPath.Row);
-			AutoCompleteTextField.AutoCompleteTableView.Hidden = true;
+        public abstract override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath);
 
-			RowSelectedEvent?.Invoke(this, EventArgs.Empty);
-		}
-	}
+        public override nint RowsInSection(UITableView tableview, nint section)
+        {
+            return Suggestions.Count;
+        }
+
+        public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
+        {
+            object selectedElement = Suggestions.ElementAt(indexPath.Row);
+            if (selectedElement is string)
+            {
+                AutoCompleteTextField.Text = selectedElement as string;
+            }
+            AutoCompleteTextField.AutoCompleteTableView.Hidden = true;
+
+            RowSelectedEvent?.Invoke(this, new AutoCompleteEventArgs(selectedElement));
+        }
+    }
 }
 
