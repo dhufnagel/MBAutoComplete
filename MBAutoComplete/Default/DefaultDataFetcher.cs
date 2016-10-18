@@ -13,9 +13,11 @@ namespace MBAutoComplete
 			_unsortedData = unsortedData;
 		}
 
-		public async Task PerformFetch(MBAutoCompleteTextField textfield, Action<ICollection<object>> completionHandler)
+		public Task PerformFetch(MBAutoCompleteTextField textfield, Action<ICollection<object>> completionHandler)
 		{
 			completionHandler(_unsortedData);
+
+            return new Task(() => { });
 		}
 	}
 }

@@ -63,6 +63,8 @@ namespace MBAutoComplete
         private bool _parentTableViewBounces = false;
         private bool _parentTableViewAllowsSelection = false;
 
+        private bool isShowing = false;
+
         public MBAutoCompleteTextField(IntPtr ptr) : base(ptr) { }
 
         public void Setup(UIViewController view, IList<object> suggestions)
@@ -172,7 +174,6 @@ namespace MBAutoComplete
             {
                 if (this.Text.Length > StartAutoCompleteAfterTicks)
                 {
-                    showAutoCompleteView();
                     await UpdateTableViewData();
                 }
             };
@@ -185,6 +186,7 @@ namespace MBAutoComplete
 
         private void showAutoCompleteView()
         {
+            isShowing = true;
             AutoCompleteTableView.SetContentOffset(CGPoint.Empty, false);
             AutoCompleteTableView.Hidden = false;
 
@@ -199,6 +201,7 @@ namespace MBAutoComplete
 
         private void hideAutoCompleteView()
         {
+            isShowing = false;
             AutoCompleteTableView.Hidden = true;
 
             if (_parentIsUITableViewController) //if is in uitableviewcontroller
@@ -214,6 +217,11 @@ namespace MBAutoComplete
             {
                 var sorted = this.SortingAlghorithm.DoSort(this.Text, unsortedData);
                 this.AutoCompleteViewSource.Suggestions = sorted;
+
+                if(!isShowing && sorted.Count > 0)
+                {
+                    showAutoCompleteView();
+                }
 
                 AutoCompleteTableView.ReloadData();
             }
