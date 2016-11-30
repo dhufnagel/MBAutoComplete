@@ -57,7 +57,7 @@ namespace MBAutoComplete
             {
                 AutoCompleteTextField.Text = selectedElement as string;
             }
-            AutoCompleteTextField.AutoCompleteTableView.Hidden = true;
+            AutoCompleteTextField.HideAutoCompleteView();
 
             RowSelectedEvent?.Invoke(this, new AutoCompleteEventArgs(selectedElement));
         }

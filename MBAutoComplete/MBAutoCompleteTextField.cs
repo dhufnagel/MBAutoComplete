@@ -172,7 +172,7 @@ namespace MBAutoComplete
             //listen to edit events
             this.EditingChanged += async (sender, eventargs) =>
             {
-                if (this.Text.Length > StartAutoCompleteAfterTicks)
+                if (this.Text.Length >= StartAutoCompleteAfterTicks)
                 {
                     await UpdateTableViewData();
                 }
@@ -180,7 +180,7 @@ namespace MBAutoComplete
 
             this.EditingDidEnd += (sender, eventargs) =>
             {
-                hideAutoCompleteView();
+                HideAutoCompleteView();
             };
         }
 
@@ -199,7 +199,7 @@ namespace MBAutoComplete
             }
         }
 
-        private void hideAutoCompleteView()
+        public void HideAutoCompleteView()
         {
             isShowing = false;
             AutoCompleteTableView.Hidden = true;
